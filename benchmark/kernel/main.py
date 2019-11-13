@@ -151,15 +151,15 @@ df_acc = []
 df_std = []
 df_iterations_time = []
 
-
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 results = []
 for dataset_name, Net in product(datasets, nets):
     best_result = (float('inf'), 0, 0)  # (loss, acc, std)
     #print('-----\n{} - {}'.format(dataset_name, Net.__name__))
     for num_layers, hidden in product(layers, hiddens):
         start_time = time.time()
-        dataset = get_dataset(dataset_name, sparse=Net != DiffPool)
-        model = Net(dataset, num_layers, hidden)
+        dataset = TUDataset('/mnt/scratch/students/vandegar/data/'+dataset_name, name=dataset_name).shuffle()
+        model = Net(dataset, num_layers, hidden).to(device)
         loss, acc, std = cross_validation_with_val_set(
             dataset,
             model,
